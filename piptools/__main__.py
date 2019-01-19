@@ -3,7 +3,7 @@ from piptools.scripts import compile, sync
 
 
 @click.group()
-def cli():
+def cli():  # pragma: no cover
     pass
 
 
