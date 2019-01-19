@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = piptools
+source = .
 include = piptools/*
 omit =
     piptools/_compat/*
