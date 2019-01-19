@@ -26,7 +26,7 @@ def dependency_tree(installed_keys, root_key):
 
     `installed_keys` should be a {key: requirement} mapping, e.g.
         {'django': from_line('django==1.8')}
-    `root_key` should be the key to return the dependency tree for.
+    `root_key` should be the key to return the dependency tree for..
     """
     dependencies = set()
     queue = collections.deque()
