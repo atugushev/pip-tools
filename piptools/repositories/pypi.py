@@ -59,7 +59,6 @@ class PyPIRepository(BaseRepository):
             index_urls=index_urls,
             trusted_hosts=pip_options.trusted_hosts,
             allow_all_prereleases=pip_options.pre,
-            process_dependency_links=pip_options.process_dependency_links,
             session=self.session,
         )
 
