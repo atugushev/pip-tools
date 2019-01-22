@@ -1,8 +1,15 @@
-from six.moves.urllib.request import pathname2url
+import os
 
 
 def pathname_to_url(path):
     """
-    Given a path to a file, returns an URL with 'file://' scheme
+    Convert a path to URI. The path will be made absolute and
+    will not have quoted path parts.
     """
-    return 'file://' + pathname2url(path)
+    path = os.path.normpath(os.path.abspath(path))
+    drive, path = os.path.splitdrive(path)
+    filepath = path.split(os.path.sep)
+    url = '/'.join(filepath)
+    if drive:
+        return 'file:///' + drive + url
+    return 'file://' + url
