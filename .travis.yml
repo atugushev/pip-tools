@@ -3,22 +3,9 @@ sudo: false
 language: python
 python:
   - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-  - "3.7"
-  - "pypy2.7-6.0"
-  - "pypy3.5-6.0"
 
 env:
-  - PIP=8.1.1
-  - PIP=9.0.1
-  - PIP=9.0.3
-  - PIP=10.0.1
-  - PIP=18.0
   - PIP=19.0
-  - PIP=latest
-  - PIP=master
 
 cache: pip
 install:
@@ -60,6 +47,3 @@ jobs:
           repo: jazzband/pip-tools
   allow_failures:
     - env: PIP=master
-
-notifications:
-  webhooks: https://coveralls.io/webhook
