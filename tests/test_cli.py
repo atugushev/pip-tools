@@ -183,19 +183,6 @@ def test_trusted_host_no_emit(pip_conf):
         assert '--no-emit-trusted-host' in out.output
 
 
-def test_cert_option(pip_conf):
-    assert os.path.exists(pip_conf)
-
-    runner = CliRunner()
-    with runner.isolated_filesystem():
-        with open('requirements.in', 'w'):
-            pass
-        out = runner.invoke(cli, ['--cert', './my.crt'])
-
-        # Check that find-links has been passed to pip
-        raise Exception(out.output)
-
-
 def test_realistic_complex_sub_dependencies(tmpdir):
 
     # make a temporary wheel of a fake package
