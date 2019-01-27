@@ -2,11 +2,9 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import os
 import sys
 from itertools import chain, groupby
 from collections import OrderedDict
-from contextlib import contextmanager
 
 from ._compat import install_req_from_line
 

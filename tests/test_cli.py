@@ -1,5 +1,6 @@
 import os
 from textwrap import dedent
+
 import subprocess
 import sys
 import mock
@@ -8,6 +9,7 @@ from click.testing import CliRunner
 
 import pytest
 
+from piptools.exceptions import PipToolsError
 from piptools._compat.pip_compat import path_to_url
 from piptools.repositories import PyPIRepository
 from piptools.scripts.compile import cli
@@ -22,6 +24,13 @@ fail_below_pip9 = pytest.mark.xfail(
     PIP_VERSION < parse_version('9'),
     reason="needs pip 9 or greater"
 )
+
+
+@pytest.fixture
+def runner():
+    cli_runner = CliRunner()
+    with cli_runner.isolated_filesystem():
+        yield cli_runner
 
 
 @pytest.yield_fixture
@@ -430,3 +439,115 @@ def test_no_candidates_pre():
 
         assert out.exit_code == 2
         assert 'Tried pre-versions:' in out.output
+
+
+def test_sync_without_requirements_file(runner):
+    out = runner.invoke(sync_cli)
+
+    assert 'No requirement files given' in out.output
+    assert out.exit_code == 2
+
+
+def test_sync_requirementsin_file(runner):
+    with open('requirements.in', 'w') as req_in:
+        req_in.write('six==1.10.0')
+
+    out = runner.invoke(sync_cli, ['requirements.in'])
+
+    assert 'ERROR: Some input files have the .in extension' in out.output
+    assert out.exit_code == 2
+
+
+@mock.patch('piptools.sync.check_call')
+def test_sync_force_requirementsin_file(check_call, runner):
+    with open('requirements.in', 'w') as req_in:
+        req_in.write('six==1.10.0')
+
+    out = runner.invoke(sync_cli, ['requirements.in', '--force'])
+    assert 'WARNING: Some input files have the .in extension' in out.output
+    assert out.exit_code == 0
+
+
+@mock.patch('piptools.sync.merge', side_effect=PipToolsError)
+def test_sync_merge_error(merge, runner):
+    with open('requirements.txt', 'w') as req_in:
+        req_in.write('six==1.10.0')
+
+    out = runner.invoke(sync_cli)
+    assert out.exit_code == 2
+
+
+@mock.patch('piptools.sync.sync')
+def test_sync_option_find_links(sync, runner):
+    with open('requirements.txt', 'w') as req_in:
+        req_in.write('six==1.10.0')
+
+    runner.invoke(sync_cli, ['--find-links', './libs'])
+
+    for call in sync.call_args_list:
+        assert call[1]['install_flags'] == ['-f', './libs']
+
+
+@pytest.mark.parametrize(
+    ('cli_flags', 'expected_install_flags'),
+    [
+        (['--find-links', './libs'], ['-f', './libs']),
+        (['--no-index'], ['--no-index']),
+        (['--index-url', 'https://example.com'], ['-i', 'https://example.com']),
+        (
+            [
+                '--extra-index-url', 'https://foo',
+                '--extra-index-url', 'https://bar',
+            ],
+            [
+                '--extra-index-url', 'https://foo',
+                '--extra-index-url', 'https://bar',
+            ]
+        ),
+        (['--user'], ['--user']),
+    ]
+)
+@mock.patch('piptools.sync.sync')
+def test_sync_install_flags(sync, cli_flags, expected_install_flags, runner):
+    with open('requirements.txt', 'w') as req_in:
+        req_in.write('six==1.10.0')
+
+    runner.invoke(sync_cli, cli_flags)
+
+    for call in sync.call_args_list:
+        assert call[1]['install_flags'] == expected_install_flags
+
+
+def test_compile_without_input_file(runner):
+    out = runner.invoke(cli)
+    assert 'If you do not specify an input file' in out.output
+    assert out.exit_code == 2
+
+
+def test_compile_stdin_without_output_file(runner):
+    out = runner.invoke(cli, ['-'])
+    assert '--output-file is required if input is from stdin' in out.output
+    assert out.exit_code == 2
+
+
+def test_compile_multiple_source_files_without_input_file(runner):
+    with open('src_file1.in', 'w') as req_in:
+        req_in.write('six==1.10.0')
+
+    with open('src_file2.in', 'w') as req_in:
+        req_in.write('django==2.1')
+
+    out = runner.invoke(cli, ['src_file1.in', 'src_file2.in'])
+
+    assert '--output-file is required if two or more input files are given' in out.output
+    assert out.exit_code == 2
+
+
+def test_compile_upgrade_or_upgrade_packages(runner):
+    with open('requirements.in', 'w') as req_in:
+        req_in.write('six==1.10.0')
+
+    out = runner.invoke(cli, ['--upgrade', '--upgrade-package', 'six'])
+
+    assert 'Only one of --upgrade or --upgrade-package can be provided as an argument' in out.output
+    assert out.exit_code == 2
