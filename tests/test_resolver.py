@@ -1,5 +1,7 @@
 import pytest
 
+from piptools.exceptions import UnsupportedConstraint
+
 
 @pytest.mark.parametrize(
     ('input', 'expected', 'prereleases'),
@@ -146,5 +148,11 @@ def test_resolver__allows_unsafe_deps(resolver, from_line, input, expected, prer
 
 def test_resolver__max_number_rounds_reached(resolver, from_line):
     input = [from_line('django')]
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError, match='after 0 rounds of resolving'):
         resolver(input).resolve(max_rounds=0)
+
+
+def test_resolver__check_constraints(resolver, from_line):
+    input = [from_line('https://example.com/#egg=example')]
+    with pytest.raises(UnsupportedConstraint):
+        resolver(input).resolve()
