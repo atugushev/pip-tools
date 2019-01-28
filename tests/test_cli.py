@@ -414,7 +414,7 @@ def test_generate_hashes_with_editable():
 
 
 @fail_below_pip9
-def test_filter_pip_markes():
+def test_filter_pip_markers():
     """
     Check that pip-compile works with pip environment markers (PEP496)
     """
@@ -474,22 +474,25 @@ def test_sync_requirementsin_file(runner):
     assert out.exit_code == 2
 
 
-@mock.patch('piptools.sync.check_call')
-def test_sync_force_requirementsin_file(check_call, runner):
+def test_sync_force_requirementsin_file(runner):
     with open('requirements.in', 'w') as req_in:
         req_in.write('six==1.10.0')
 
-    out = runner.invoke(sync_cli, ['requirements.in', '--force'])
+    with mock.patch('piptools.sync.check_call'):
+        out = runner.invoke(sync_cli, ['requirements.in', '--force'])
+
     assert 'WARNING: Some input files have the .in extension' in out.output
     assert out.exit_code == 0
 
 
-@mock.patch('piptools.sync.merge', side_effect=PipToolsError)
-def test_sync_merge_error(merge, runner):
+def test_sync_merge_error(runner):
     with open('requirements.txt', 'w') as req_in:
         req_in.write('six==1.10.0')
 
-    out = runner.invoke(sync_cli)
+    with mock.patch('piptools.sync.merge', side_effect=PipToolsError('Exception text')):
+        out = runner.invoke(sync_cli)
+
+    assert out.output == 'Exception text\n'
     assert out.exit_code == 2
 
 
@@ -595,3 +598,19 @@ def test_compile_stdin(runner):
 
     assert '#    pip-compile --output-file requirements.txt -' in out.output
     assert 'six==1.10.0' in out.output
+
+
+@pytest.mark.parametrize('option, attr, expected', [
+    ('--cert', 'cert', 'foo.crt'),
+    ('--client-cert', 'client_cert', 'bar.pem'),
+])
+@mock.patch('piptools.scripts.compile.PyPIRepository')
+def test_cert_option(MockedPyPIRepository, runner, option, attr, expected):
+    with open('requirements.in', 'w') as req_in:
+        req_in.write('six==1.10.0')
+
+    out = runner.invoke(cli, [option, expected])
+
+    assert 'six==1.10.0' in out.output
+    for call in MockedPyPIRepository.call_args_list:
+        assert call[0][0].__dict__[attr] == expected
