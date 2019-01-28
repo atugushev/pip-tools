@@ -142,3 +142,9 @@ def test_resolver__allows_unsafe_deps(resolver, from_line, input, expected, prer
     output = resolver(input, prereleases=prereleases, allow_unsafe=True).resolve()
     output = {str(line) for line in output}
     assert output == {str(line) for line in expected}
+
+
+def test_resolver__max_number_rounds_reached(resolver, from_line):
+    input = [from_line('django')]
+    with pytest.raises(RuntimeError):
+        resolver(input).resolve(max_rounds=0)
