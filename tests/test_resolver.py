@@ -1,3 +1,4 @@
+import mock
 import pytest
 
 from piptools.exceptions import UnsupportedConstraint
@@ -158,4 +159,17 @@ def test_resolver__check_constraints(resolver, from_line):
         from_line('https://example.com/#egg=example')
     ]
     with pytest.raises(UnsupportedConstraint):
+        resolver(input).resolve()
+
+
+@mock.patch('piptools.resolver.Resolver.get_best_match')
+def test_resolver__unpinned_dependency_raised_exception(get_best_match, resolver, from_line):
+    # Mock get_best_match to return unpinned package
+    get_best_match.return_value = from_line('django>=1.8')
+
+    input = [
+        from_line('django'),
+    ]
+
+    with pytest.raises(TypeError, match='got django>=1.8'):
         resolver(input).resolve()
