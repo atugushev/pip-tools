@@ -153,6 +153,9 @@ def test_resolver__max_number_rounds_reached(resolver, from_line):
 
 
 def test_resolver__check_constraints(resolver, from_line):
-    input = [from_line('https://example.com/#egg=example')]
+    input = [
+        from_line('django'),
+        from_line('https://example.com/#egg=example')
+    ]
     with pytest.raises(UnsupportedConstraint):
         resolver(input).resolve()
