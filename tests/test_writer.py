@@ -6,8 +6,8 @@ from piptools.writer import OutputWriter
 
 
 @fixture
-def writer():
-    return OutputWriter(src_files=["src_file", "src_file2"], dst_file="dst_file",
+def writer(tmp_file):
+    return OutputWriter(src_files=["src_file", "src_file2"], dst_file=tmp_file,
                         dry_run=True,
                         emit_header=True, emit_index=True, emit_trusted_host=True,
                         annotate=True,
@@ -84,10 +84,10 @@ def test_format_requirement_environment_marker(from_line, writer):
 
 
 @mark.parametrize(('allow_unsafe',), [(True,), (False,)])
-def test_iter_lines__unsafe_dependencies(from_line, allow_unsafe):
+def test_iter_lines__unsafe_dependencies(from_line, allow_unsafe, tmp_file):
 
     writer = OutputWriter(
-        src_files=["src_file", "src_file2"], dst_file="dst_file",
+        src_files=["src_file", "src_file2"], dst_file=tmp_file,
         dry_run=True,
         emit_header=True, emit_index=True, emit_trusted_host=True,
         annotate=True,
@@ -112,9 +112,15 @@ def test_iter_lines__unsafe_dependencies(from_line, allow_unsafe):
     ))
     assert comment('# The following packages are considered to be unsafe in a requirements file:') in str_lines
     if allow_unsafe:
-        assert comment('#    pip-compile --allow-unsafe --output-file dst_file src_file src_file2') in str_lines
+        assert comment('#    pip-compile --allow-unsafe --output-file {} src_file src_file2'.format(tmp_file.name)) \
+               in str_lines
         assert 'setuptools' in str_lines
     else:
-        assert comment('#    pip-compile --output-file dst_file src_file src_file2') in str_lines
+        assert comment('#    pip-compile --output-file {} src_file src_file2'.format(tmp_file.name)) in str_lines
         assert comment('# setuptools') in str_lines
     assert 'test==1.2' in str_lines
+
+
+def test_write_header_output_file_printed(writer, tmp_file):
+    expected = comment('#    pip-compile --output-file {} src_file src_file2'.format(tmp_file.name))
+    assert expected in list(writer.write_header())
