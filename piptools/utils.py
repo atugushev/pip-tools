@@ -10,8 +10,7 @@ from contextlib import contextmanager
 
 from ._compat import install_req_from_line
 
-from .click import style
-
+from .click import style, get_binary_stream, get_text_stream
 
 UNSAFE_PACKAGES = {'setuptools', 'distribute', 'pip'}
 
@@ -266,3 +265,10 @@ def get_hashes_from_ireq(ireq):
         for hash_ in hexdigests:
             result.append("{}:{}".format(algorithm, hash_))
     return result
+
+
+def is_stdout(fp):
+    """
+    Return True if a file object is a binary or text stdout, otherwise False.
+    """
+    return fp in (get_binary_stream('stdout'), get_text_stream('stdout'))

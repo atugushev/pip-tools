@@ -1,7 +1,10 @@
+import sys
+
 from pytest import raises
 
 from piptools.utils import (
-    as_tuple, format_requirement, format_specifier, flat_map, dedup, get_hashes_from_ireq)
+    as_tuple, format_requirement, format_specifier, flat_map, dedup, get_hashes_from_ireq,
+    is_stdout)
 
 
 def test_format_requirement(from_line):
@@ -89,3 +92,17 @@ def test_get_hashes_from_ireq(from_line):
         'sha256:f5c056e8f62d45ba8215e5cb8f50dfccb198b4b9fbea8500674f3443e4689589',
     ]
     assert get_hashes_from_ireq(ireq) == expected
+
+
+def test_is_stdout(capsys, tmp_file):
+    # Check the stdout
+    with capsys.disabled():
+        assert is_stdout(sys.stdout)
+
+    # Check the other standard streams
+    with capsys.disabled():
+        assert not is_stdout(sys.stderr)
+        assert not is_stdout(sys.stdin)
+
+    # Check a temporary file
+    assert not is_stdout(tmp_file)

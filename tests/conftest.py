@@ -1,6 +1,7 @@
 import json
 from contextlib import contextmanager
 from functools import partial
+from tempfile import NamedTemporaryFile
 
 from pip._vendor.packaging.version import Version
 from pip._vendor.pkg_resources import Requirement
@@ -112,3 +113,9 @@ def from_line():
 @fixture
 def from_editable():
     return install_req_from_editable
+
+
+@fixture
+def tmp_file():
+    with NamedTemporaryFile('wt') as fp:
+        yield fp

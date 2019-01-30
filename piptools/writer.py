@@ -1,11 +1,9 @@
 import os
 from itertools import chain
 
-from ._compat import ExitStack
 from .click import unstyle
-from .io import AtomicSaver
 from .logging import log
-from .utils import comment, dedup, format_requirement, key_from_req, UNSAFE_PACKAGES
+from .utils import comment, dedup, format_requirement, key_from_req, UNSAFE_PACKAGES, is_stdout
 
 
 class OutputWriter(object):
@@ -51,7 +49,9 @@ class OutputWriter(object):
                     params += ["--generate-hashes"]
                 if self.allow_unsafe:
                     params += ["--allow-unsafe"]
-                params += ['--output-file', self.dst_file]
+                # Keep dash filename for the stdout
+                output_filename = '-' if is_stdout(self.dst_file) else self.dst_file.name
+                params += ['--output-file', output_filename]
                 params += self.src_files
                 yield comment('#    pip-compile {}'.format(' '.join(params)))
             yield comment('#')
@@ -121,17 +121,13 @@ class OutputWriter(object):
 
     def write(self, results, unsafe_requirements, reverse_dependencies,
               primary_packages, markers, hashes):
-        with ExitStack() as stack:
-            f = None
-            if not self.dry_run:
-                f = stack.enter_context(AtomicSaver(self.dst_file))
 
-            for line in self._iter_lines(results, unsafe_requirements, reverse_dependencies,
-                                         primary_packages, markers, hashes):
-                log.info(line)
-                if f:
-                    f.write(unstyle(line).encode('utf-8'))
-                    f.write(os.linesep.encode('utf-8'))
+        for line in self._iter_lines(results, unsafe_requirements, reverse_dependencies,
+                                     primary_packages, markers, hashes):
+            log.info(line)
+            if not self.dry_run:
+                self.dst_file.write(unstyle(line).encode('utf-8'))
+                self.dst_file.write(os.linesep.encode('utf-8'))
 
     def _format_requirement(self, ireq, reverse_dependencies, primary_packages, marker=None, hashes=None):
         ireq_hashes = (hashes if hashes is not None else {}).get(ireq)

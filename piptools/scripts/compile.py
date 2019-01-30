@@ -7,6 +7,8 @@ import os
 import sys
 import tempfile
 
+from click.utils import safecall
+
 from .._compat import (
     install_req_from_line,
     parse_requirements,
@@ -19,10 +21,11 @@ from ..exceptions import PipToolsError
 from ..logging import log
 from ..repositories import LocalRequirementsRepository, PyPIRepository
 from ..resolver import Resolver
-from ..utils import (dedup, is_pinned_requirement, key_from_req, UNSAFE_PACKAGES)
+from ..utils import dedup, is_pinned_requirement, key_from_req, UNSAFE_PACKAGES, is_stdout
 from ..writer import OutputWriter
 
 DEFAULT_REQUIREMENTS_FILE = 'requirements.in'
+DEFAULT_REQUIREMENTS_OUTPUT_FILE = 'requirements.txt'
 
 
 class PipCommand(Command):
@@ -31,6 +34,7 @@ class PipCommand(Command):
 
 @click.command()
 @click.version_option()
+@click.pass_context
 @click.option('-v', '--verbose', count=True, help="Show more output")
 @click.option('-q', '--quiet', count=True, help="Give less output")
 @click.option('-n', '--dry-run', is_flag=True, help="Only show what would happen, don't change anything")
@@ -56,7 +60,7 @@ class PipCommand(Command):
               help='Try to upgrade all dependencies to their latest versions')
 @click.option('-P', '--upgrade-package', 'upgrade_packages', nargs=1, multiple=True,
               help="Specify particular packages to upgrade.")
-@click.option('-o', '--output-file', nargs=1, type=str, default=None,
+@click.option('-o', '--output-file', nargs=1, default=None, type=click.File('w+b', atomic=True),
               help=('Output file name. Required if more than one input file is given. '
                     'Will be derived from input file otherwise.'))
 @click.option('--allow-unsafe', is_flag=True, default=False,
@@ -66,7 +70,7 @@ class PipCommand(Command):
 @click.option('--max-rounds', default=10,
               help="Maximum number of rounds before resolving the requirements aborts.")
 @click.argument('src_files', nargs=-1, type=click.Path(exists=True, allow_dash=True))
-def cli(verbose, quiet, dry_run, pre, rebuild, find_links, index_url, extra_index_url,
+def cli(ctx, verbose, quiet, dry_run, pre, rebuild, find_links, index_url, extra_index_url,
         cert, client_cert, trusted_host, header, index, emit_trusted_host, annotate,
         upgrade, upgrade_packages, output_file, allow_unsafe, generate_hashes,
         src_files, max_rounds):
@@ -78,8 +82,6 @@ def cli(verbose, quiet, dry_run, pre, rebuild, find_links, index_url, extra_inde
             src_files = (DEFAULT_REQUIREMENTS_FILE,)
         elif os.path.exists('setup.py'):
             src_files = ('setup.py',)
-            if not output_file:
-                output_file = 'requirements.txt'
         else:
             raise click.BadParameter(("If you do not specify an input file, "
                                       "the default is {} or setup.py").format(DEFAULT_REQUIREMENTS_FILE))
@@ -94,8 +96,18 @@ def cli(verbose, quiet, dry_run, pre, rebuild, find_links, index_url, extra_inde
     if output_file:
         dst_file = output_file
     else:
-        base_name = src_files[0].rsplit('.', 1)[0]
-        dst_file = base_name + '.txt'
+        # Use default requirements output file if there is a setup.py in a source file
+        if len(src_files) == 1 and src_files[0] == 'setup.py':
+            file_name = DEFAULT_REQUIREMENTS_OUTPUT_FILE
+        # Otherwise derive it from the source file
+        else:
+            base_name = src_files[0].rsplit('.', 1)[0]
+            file_name = base_name + '.txt'
+
+        dst_file = click.open_file(file_name, 'w+b', atomic=True, lazy=True)
+
+        # Close the file at the end of the context execution
+        ctx.call_on_close(safecall(dst_file.close))
 
     if upgrade and upgrade_packages:
         raise click.BadParameter('Only one of --upgrade or --upgrade-package can be provided as an argument.')
@@ -133,8 +145,9 @@ def cli(verbose, quiet, dry_run, pre, rebuild, find_links, index_url, extra_inde
     upgrade_install_reqs = {}
     # Proxy with a LocalRequirementsRepository if --upgrade is not specified
     # (= default invocation)
-    if not upgrade and os.path.exists(dst_file):
-        ireqs = parse_requirements(dst_file, finder=repository.finder, session=repository.session, options=pip_options)
+    if not upgrade and not is_stdout(dst_file) and os.path.exists(dst_file.name):
+        ireqs = parse_requirements(
+            dst_file.name, finder=repository.finder, session=repository.session, options=pip_options)
         # Exclude packages from --upgrade-package/-P from the existing pins: We want to upgrade.
         upgrade_reqs_gen = (install_req_from_line(pkg) for pkg in upgrade_packages)
         upgrade_install_reqs = {key_from_req(install_req.req): install_req for install_req in upgrade_reqs_gen}
