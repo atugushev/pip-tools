@@ -444,7 +444,7 @@ def test_no_candidates_pre():
 
 @pytest.mark.usefixtures('pip_conf')
 def test_default_index_url():
-    status, output = _invoke(['pip-compile', '--help'])
+    status, output = _invoke([sys.executable, '-m', 'piptools', 'compile', '--help'])
     output = output.decode('utf-8')
 
     assert status == 0
