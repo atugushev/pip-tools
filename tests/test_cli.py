@@ -440,3 +440,12 @@ def test_no_candidates_pre():
 
         assert out.exit_code == 2
         assert 'Tried pre-versions:' in out.output
+
+
+@pytest.mark.usefixtures('pip_conf')
+def test_default_index_url():
+    status, output = _invoke(['pip-compile', '--help'])
+    output = output.decode('utf-8')
+
+    assert status == 0
+    assert 'http://example.com' in output
