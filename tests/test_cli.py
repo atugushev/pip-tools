@@ -449,7 +449,7 @@ def test_default_index_url():
 
     assert status == 0
     expected = (
-        '  -i, --index-url TEXT            Change index URL (defaults to\n\n'
-        #'                                  http://example.com)'
+        '  -i, --index-url TEXT            Change index URL (defaults to\n'
+        '                                  http://example.com)'
     )
-    assert expected in output
+    assert expected in '\n'.join(output.split('\n'))
