@@ -445,11 +445,11 @@ def test_no_candidates_pre():
 @pytest.mark.usefixtures('pip_conf')
 def test_default_index_url():
     status, output = _invoke([sys.executable, '-m', 'piptools', 'compile', '--help'])
-    output = output.decode('utf-8')
+    output = output.decode('ascii')
 
     assert status == 0
     expected = (
-        '  -i, --index-url TEXT            Change index URL (defaults to' + os.linesep.encode('utf-8')
+        '  -i, --index-url TEXT            Change index URL (defaults to\n'
         #'                                  http://example.com)'
     )
     assert expected in output
