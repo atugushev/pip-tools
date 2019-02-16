@@ -459,11 +459,9 @@ def test_default_index_url():
     assert expected in output
 
 
-@pytest.mark.usefixtures('pip_conf')
-def test_default_index_url2():
-    runner = CliRunner()
-    with runner.isolated_filesystem():
-        out = runner.invoke(cli, ['--help'])
 
-        import base64
-        raise Exception(base64.b64encode(out.output.encode('utf-8')))
+@pytest.mark.usefixtures('pip_conf')
+def test_default_index_url3():
+    status, output = _invoke([sys.executable, '-m', 'pip', '--help'])
+    import base64
+    raise Exception(base64.b64encode(output))
