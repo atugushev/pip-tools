@@ -448,8 +448,12 @@ def test_default_index_url():
     output = output.decode('ascii')
 
     assert status == 0
+    import base64
+    raise Exception(base64.b64encode(output))
     expected = (
         '  -i, --index-url TEXT            Change index URL (defaults to\n'
         '                                  http://example.com)'
     )
     assert expected in '\n'.join(output.split('\n'))
+
+
