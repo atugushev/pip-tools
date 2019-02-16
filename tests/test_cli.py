@@ -179,12 +179,13 @@ def test_realistic_complex_sub_dependencies(tmpdir):
         assert out.exit_code == 0
 
 
-def _invoke(command):
+def _invoke(command, **kwargs):
     """Invoke sub-process."""
     try:
         output = subprocess.check_output(
             command,
             stderr=subprocess.STDOUT,
+            **kwargs,
         )
         status = 0
     except subprocess.CalledProcessError as error:
@@ -444,12 +445,11 @@ def test_no_candidates_pre():
 
 @pytest.mark.usefixtures('pip_conf')
 def test_default_index_url():
-    status, output = _invoke([sys.executable, '-m', 'piptools', 'compile', '--help'])
-    output = output.decode('ascii')
+    status, output = _invoke([sys.executable, '-m', 'piptools', 'compile', '--help'], universal_newlines=True)
 
     assert status == 0
     import base64
-    raise Exception(base64.b64encode(output))
+    raise Exception(base64.b64encode(output.encode()))
     expected = (
         '  -i, --index-url TEXT            Change index URL (defaults to\n'
         '                                  http://example.com)'
