@@ -185,7 +185,7 @@ def _invoke(command, **kwargs):
         output = subprocess.check_output(
             command,
             stderr=subprocess.STDOUT,
-            **kwargs,
+            **kwargs
         )
         status = 0
     except subprocess.CalledProcessError as error:
