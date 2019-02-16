@@ -445,7 +445,7 @@ def test_no_candidates_pre():
 
 @pytest.mark.usefixtures('pip_conf')
 def test_default_index_url():
-    status, output = _invoke([sys.executable, '-m', 'piptools', 'compile', '--help'], universal_newlines=True)
+    status, output = _invoke([sys.executable, '-m', 'piptools', 'compile', '--help'], universal_newlines=True, shell=True)
 
     assert status == 0
     import base64
