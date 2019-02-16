@@ -448,9 +448,8 @@ def test_default_index_url():
     output = output.decode('utf-8')
 
     assert status == 0
-    raise Exception(output.splitlines())
     expected = (
-        '  -i, --index-url TEXT            Change index URL (defaults to '
+        '  -i, --index-url TEXT            Change index URL (defaults to\r\n'
         #'                                  http://example.com)'
     )
     assert expected in output
