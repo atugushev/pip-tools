@@ -1,9 +1,0 @@
-[run]
-branch = True
-source = .
-omit =
-    piptools/_compat/*
-    piptools/_vendored/*
-
-[report]
-include = piptools/*, tests/*
