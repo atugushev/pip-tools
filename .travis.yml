@@ -31,40 +31,56 @@ stages:
 - name: deploy
   if: repo = jazzband/pip-tools AND tag IS present
 
+_coverage: &_coverage
+  after_success:
+    - travis_retry pip install codecov coveralls
+    - codecov -n "py${TRAVIS_PYTHON_VERSION}-pip${PIP}-${TRAVIS_OS_NAME}"
+    - "COVERALLS_PARALLEL=true coveralls"
+
 jobs:
   exclude:
-    - python: "pypy3.5-6.0"
-      env: PIP=8.1.1
-
     # Baseline jobs (included there/below).
     - env: PIP=latest
       python: "3.7"
     - env: PIP=latest
       python: "2.7"
 
+    # Coverage jobs (included there/below).
+    - env: PIP=latest
+      python: 2.7
+    - env: PIP=latest
+      python: 3.7
+    - env: PIP=9.0.3
+      python: 3.7
+
   include:
     # Baseline stage to abort early.
-    - stage: baseline
+    - <<: *_coverage
+      stage: baseline
       env: PIP=latest
       python: "3.7"
-    - env: PIP=latest
+    - <<: *_coverage
+      env: PIP=latest
       python: "2.7"
 
     # QA checks.
     - env: TOXENV=checkqa
       python: 3.7
-      after_success: skip  # No need coverage
       cache:
         directories:
           - $HOME/.cache/pre-commit
     - env: TOXENV=readme
       python: 2.7
-      after_success: skip  # No need coverage
+
+    # Cover the test_pypirepo_calls_reqset_with_str_paths
+    - <<: *_coverage
+      stage: test
+      env: PIP=9.0.3
+      python: 3.7
 
     # Default stage (used with matrix).
-    - stage: test
+    - env: PIP=latest
       python: 3.8-dev
-      env: PIP=latest
 
     # Only test pypy/pypy3 with latest pip.
     - env: PIP=latest
@@ -77,7 +93,6 @@ jobs:
       script: skip  # No test on the deploy stage.
       python: 2.7
       env: skip  # No special env required.
-      after_success: true  # No need coverage
       deploy:
         provider: pypi
         user: jazzband
@@ -91,11 +106,6 @@ jobs:
   allow_failures:
     - env: PIP=master
     - python: 3.8-dev
-
-after_success:
-  - travis_retry pip install codecov coveralls
-  - codecov -n "py${TRAVIS_PYTHON_VERSION}-pip${PIP}-${TRAVIS_OS_NAME}"
-  - "COVERALLS_PARALLEL=true coveralls"
 
 notifications:
   webhooks: https://coveralls.io/webhook

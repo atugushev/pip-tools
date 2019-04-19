@@ -3,7 +3,7 @@ environment:
       PYTHON: "C:\\Python36"
 
     matrix:
-        - TOXENV: py27-pip8.1.1-coverage
+        - TOXENV: py27-pip8.1.1
           PIP: 8.1.1
         - TOXENV: py27-pip9.0.1
           PIP: 9.0.1
@@ -24,7 +24,7 @@ environment:
           PIP: 8.1.1
         - TOXENV: py34-pip9.0.1
           PIP: 9.0.1
-        - TOXENV: py34-pip9.0.3-coverage
+        - TOXENV: py34-pip9.0.3
           PIP: 9.0.3
         - TOXENV: py34-pip10.0.1
           PIP: 10.0.1
@@ -45,7 +45,7 @@ environment:
           PIP: 9.0.3
         - TOXENV: py35-pip10.0.1
           PIP: 10.0.1
-        - TOXENV: py35-pip18.0-coverage
+        - TOXENV: py35-pip18.0
           PIP: 18.0
         - TOXENV: py35-pip19.0
           PIP: 19.0
@@ -64,7 +64,7 @@ environment:
           PIP: 10.0.1
         - TOXENV: py36-pip18.0
           PIP: 18.0
-        - TOXENV: py36-pip19.0-coverage
+        - TOXENV: py36-pip19.0
           PIP: 19.0
         - TOXENV: py36-pipmaster
           PIP: master
@@ -75,7 +75,7 @@ environment:
           PIP: 8.1.1
         - TOXENV: py37-pip9.0.1
           PIP: 9.0.1
-        - TOXENV: py37-pip9.0.3
+        - TOXENV: py37-pip9.0.3-coverage
           PIP: 9.0.3
         - TOXENV: py37-pip10.0.1
           PIP: 10.0.1
