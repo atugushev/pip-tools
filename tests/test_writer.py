@@ -7,19 +7,21 @@ from piptools.writer import OutputWriter
 
 
 @fixture
-def writer(tmp_file):
+def writer(tmpdir):
     with open("src_file", "w"):
         pass
 
     with open("src_file2", "w"):
         pass
 
-    cli_args = ["--dry-run", "--output-file", tmp_file.name, "src_file", "src_file2"]
+    output_file = tmpdir / "requirements.txt"
+
+    cli_args = ["--dry-run", "--output-file", output_file, "src_file", "src_file2"]
 
     with cli.make_context("pip-compile", cli_args) as ctx:
         writer = OutputWriter(
             src_files=["src_file", "src_file2"],
-            dst_file=tmp_file,
+            dst_file=ctx.params["output_file"],
             click_ctx=ctx,
             dry_run=True,
             emit_header=True,
@@ -131,7 +133,7 @@ def test_iter_lines__unsafe_dependencies(writer, from_line, allow_unsafe):
     assert "test==1.2" in str_lines
 
 
-def test_write_header(writer, tmp_file):
+def test_write_header(writer):
     expected = map(
         comment,
         [
@@ -140,7 +142,7 @@ def test_write_header(writer, tmp_file):
             "# To update, run:",
             "#",
             "#    pip-compile --output-file={} src_file src_file2".format(
-                tmp_file.name
+                writer.click_ctx.params["output_file"]
             ),
             "#",
         ],
