@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import os
 
 import six
-from pytest import fixture, mark, raises
+from pytest import mark, raises
 from six.moves import shlex_quote
 
 from piptools.scripts.compile import cli as compile_cli
@@ -21,12 +21,6 @@ from piptools.utils import (
     is_pinned_requirement,
     name_from_req,
 )
-
-
-@fixture
-def tmpdir_cwd(tmpdir):
-    with tmpdir.as_cwd():
-        yield tmpdir
 
 
 def test_format_requirement(from_line):
