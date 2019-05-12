@@ -1,6 +1,7 @@
 # coding: utf-8
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import os
 import sys
 from collections import OrderedDict
 from itertools import chain, groupby
@@ -351,6 +352,10 @@ def get_compile_command(click_ctx):
             value = [value]
 
         for val in value:
+            # Skip environment values, since they are not part of the command options
+            if option.envvar is not None and os.environ.get(option.envvar) == val:
+                continue
+
             # Flags don't have a value, thus add to args true or false option long name
             if option.is_flag:
                 # If there are false-options, choose an option name depending on a value

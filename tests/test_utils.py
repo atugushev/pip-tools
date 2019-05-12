@@ -324,3 +324,34 @@ def test_get_compile_command_sort_args(tmpdir_cwd):
             "--no-annotate --no-emit-trusted-host --no-index "
             "requirements.in setup.py"
         )
+
+
+@mark.parametrize(
+    "cli_args, env, expected_command",
+    [
+        # Env var should not be in command options
+        ([], ["PIP_INDEX_URL", "https://foo"], "pip-compile"),
+        (
+            ["-i", "https://foo"],
+            ["PIP_INDEX_URL", "https://bar"],
+            "pip-compile --index-url=https://foo",
+        ),
+        (
+            ["-i", "https://foo"],
+            ["PIP_INDEX_URL", "https://foo"],
+            "pip-compile --index-url=https://foo",
+        ),
+        ([], ["PIP_FIND_LINKS", "foo"], "pip-compile"),
+        (
+            ["-f", "bar", "-f", "foo"],
+            ["PIP_FIND_LINKS", "baz"],
+            "pip-compile --find-links=bar --find-links=foo",
+        ),
+    ],
+)
+def test_get_compile_command_with_envvars(
+    tmpdir_cwd, monkeypatch, cli_args, env, expected_command
+):
+    monkeypatch.setenv(*env)
+    with compile_cli.make_context("pip-compile", cli_args) as ctx:
+        assert get_compile_command(ctx) == expected_command
