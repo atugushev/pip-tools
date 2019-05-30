@@ -3,6 +3,14 @@ environment:
       PYTHON: "C:\\Python36"
 
     matrix:
+        # Baseline tests
+        - TOXENV: py27-piplatest-coverage
+          PIP: latest
+        - TOXENV: py37-piplatest-coverage
+          PIP: latest
+        - TOXENV: checkqa
+
+        # Python 2.7
         - TOXENV: py27-pip8.1.1-coverage
           PIP: 8.1.1
         - TOXENV: py27-pip9.0.1
@@ -17,9 +25,8 @@ environment:
           PIP: 19.0
         - TOXENV: py27-pipmaster
           PIP: master
-        - TOXENV: py27-piplatest-coverage
-          PIP: latest
 
+        # Python 3.4
         - TOXENV: py34-pip8.1.1
           PIP: 8.1.1
         - TOXENV: py34-pip9.0.1
@@ -37,6 +44,7 @@ environment:
         - TOXENV: py34-piplatest
           PIP: latest
 
+        # Python 3.5
         - TOXENV: py35-pip8.1.1
           PIP: 8.1.1
         - TOXENV: py35-pip9.0.1
@@ -54,6 +62,7 @@ environment:
         - TOXENV: py35-piplatest
           PIP: latest
 
+        # Python 3.6
         - TOXENV: py36-pip8.1.1
           PIP: 8.1.1
         - TOXENV: py36-pip9.0.1
@@ -71,6 +80,7 @@ environment:
         - TOXENV: py36-piplatest
           PIP: latest
 
+        # Python 3.7
         - TOXENV: py37-pip8.1.1
           PIP: 8.1.1
         - TOXENV: py37-pip9.0.1
@@ -85,8 +95,6 @@ environment:
           PIP: 19.0
         - TOXENV: py37-pipmaster-coverage
           PIP: master
-        - TOXENV: py37-piplatest-coverage
-          PIP: latest
 
 matrix:
   fast_finish: true
