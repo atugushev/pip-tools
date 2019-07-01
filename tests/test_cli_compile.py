@@ -244,8 +244,7 @@ def test_editable_package_vcs(runner):
     with open("requirements.in", "w") as req_in:
         req_in.write("-e " + vcs_package)
     out = runner.invoke(cli, ["-n", "--rebuild"])
-    print(out.output)
-    assert out.exit_code == 0
+    assert out.exit_code == 0, out.output
     assert vcs_package in out.output
     assert "pytest" in out.output  # dependency of pytest-django
 
