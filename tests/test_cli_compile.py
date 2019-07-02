@@ -236,7 +236,7 @@ def test_editable_package(runner):
 
 
 def test_editable_package_vcs(runner):
-    vcs_package = "git+git://github.com/pytest-dev/pytest" "#egg=pytest-django"
+    vcs_package = "git+git://github.com/pytest-dev/pytest@3.7.0#egg=pytest-django"
     with open("requirements.in", "w") as req_in:
         req_in.write("-e " + vcs_package)
     out = runner.invoke(cli, ["-n", "--rebuild"])
