@@ -1,12 +1,15 @@
 environment:
     global:
-      PYTHON: "C:\\Python27"
+      PYTHON: "C:\\Python36"
+
+    matrix:
+        - TOXENV: py27-pip8.1.1
 
 install:
     - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+    - pip install tox
 
 build: false
 
 test_script:
-    - python -V
-    - pip install pip==8.1.1
+    - tox
