@@ -3,22 +3,8 @@ sudo: false
 language: python
 python:
   - "3.8-dev"
-
-env:
-  - PIP=latest
-
 cache: pip
 install:
   - travis_retry pip install tox-travis
 script:
-  - tox -- --version
-
-stages:
-- test
-
-jobs:
-  include:
-    # Default stage (used with matrix).
-    - stage: test
-      python: 3.8-dev
-      env: PIP=latest
+  - tox -e py38
