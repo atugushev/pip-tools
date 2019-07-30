@@ -1,7 +1,9 @@
 import mock
 import pytest
+from pip._internal.download import path_to_url
+from pip._internal.models.link import Link
+from pip._vendor.requests import Session
 
-from piptools._compat.pip_compat import Link, Session, path_to_url
 from piptools.repositories.pypi import open_local_or_remote_file
 
 

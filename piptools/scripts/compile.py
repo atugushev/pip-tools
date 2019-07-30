@@ -6,9 +6,11 @@ import sys
 import tempfile
 
 from click.utils import safecall
+from pip._internal.commands import InstallCommand
+from pip._internal.req import parse_requirements
+from pip._internal.req.constructors import install_req_from_line
 
 from .. import click
-from .._compat import InstallCommand, install_req_from_line, parse_requirements
 from ..exceptions import PipToolsError
 from ..logging import log
 from ..repositories import LocalRequirementsRepository, PyPIRepository

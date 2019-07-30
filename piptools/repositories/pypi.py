@@ -7,28 +7,28 @@ import os
 from contextlib import contextmanager
 from shutil import rmtree
 
-from .._compat import (
-    FAVORITE_HASH,
-    InstallCommand,
-    Link,
-    PyPI,
-    RequirementSet,
-    Resolver as PipResolver,
-    TemporaryDirectory,
-    Wheel,
-    contextlib,
+from pip._internal.commands import InstallCommand
+from pip._internal.download import (
     is_dir_url,
     is_file_url,
     is_vcs_url,
     path_to_url,
     url_to_path,
 )
+from pip._internal.legacy_resolve import Resolver as PipResolver
+from pip._internal.models.index import PyPI
+from pip._internal.models.link import Link
+from pip._internal.operations.prepare import RequirementPreparer
+from pip._internal.req import RequirementSet
+from pip._internal.utils.hashes import FAVORITE_HASH
+from pip._internal.wheel import Wheel
+
+from .._compat import TemporaryDirectory, contextlib
 from ..cache import CACHE_DIR
 from ..click import progressbar
 from ..exceptions import NoCandidateFound
 from ..logging import log
 from ..utils import (
-    PIP_VERSION,
     fs_str,
     is_pinned_requirement,
     is_url_requirement,
@@ -142,16 +142,8 @@ class PyPIRepository(BaseRepository):
         if not matching_candidates:
             raise NoCandidateFound(ireq, all_candidates, self.finder)
 
-        if PIP_VERSION < (19, 1):
-            best_candidate = max(
-                matching_candidates, key=self.finder._candidate_sort_key
-            )
-        elif PIP_VERSION < (19, 2):
-            evaluator = self.finder.candidate_evaluator
-            best_candidate = evaluator.get_best_candidate(matching_candidates)
-        else:
-            evaluator = self.finder.make_candidate_evaluator(ireq.name)
-            best_candidate = evaluator.get_best_candidate(matching_candidates)
+        evaluator = self.finder.make_candidate_evaluator(ireq.name)
+        best_candidate = evaluator.get_best_candidate(matching_candidates)
 
         # Turn the candidate into a pinned InstallRequirement
         return make_install_requirement(
@@ -162,56 +154,41 @@ class PyPIRepository(BaseRepository):
         )
 
     def resolve_reqs(self, download_dir, ireq, wheel_cache):
-        results = None
-
-        if PIP_VERSION < (10,):
-            reqset = RequirementSet(
-                self.build_dir,
-                self.source_dir,
-                download_dir=download_dir,
-                wheel_download_dir=self._wheel_download_dir,
-                session=self.session,
-                wheel_cache=wheel_cache,
-            )
-            results = reqset._prepare_file(self.finder, ireq)
-        else:
-            from pip._internal.operations.prepare import RequirementPreparer
-
-            preparer_kwargs = {
-                "build_dir": self.build_dir,
-                "src_dir": self.source_dir,
-                "download_dir": download_dir,
-                "wheel_download_dir": self._wheel_download_dir,
-                "progress_bar": "off",
-                "build_isolation": self.build_isolation,
-            }
-            resolver_kwargs = {
-                "finder": self.finder,
-                "session": self.session,
-                "upgrade_strategy": "to-satisfy-only",
-                "force_reinstall": False,
-                "ignore_dependencies": False,
-                "ignore_requires_python": False,
-                "ignore_installed": True,
-                "isolated": False,
-                "wheel_cache": wheel_cache,
-                "use_user_site": False,
-            }
-            resolver = None
-            preparer = None
-            with RequirementTracker() as req_tracker:
-                # Pip 18 uses a requirement tracker to prevent fork bombs
-                if req_tracker:
-                    preparer_kwargs["req_tracker"] = req_tracker
-                preparer = RequirementPreparer(**preparer_kwargs)
-                resolver_kwargs["preparer"] = preparer
-                reqset = RequirementSet()
-                ireq.is_direct = True
-                reqset.add_requirement(ireq)
-                resolver = PipResolver(**resolver_kwargs)
-                resolver.require_hashes = False
-                results = resolver._resolve_one(reqset, ireq)
-                reqset.cleanup_files()
+        preparer_kwargs = {
+            "build_dir": self.build_dir,
+            "src_dir": self.source_dir,
+            "download_dir": download_dir,
+            "wheel_download_dir": self._wheel_download_dir,
+            "progress_bar": "off",
+            "build_isolation": self.build_isolation,
+        }
+        resolver_kwargs = {
+            "finder": self.finder,
+            "session": self.session,
+            "upgrade_strategy": "to-satisfy-only",
+            "force_reinstall": False,
+            "ignore_dependencies": False,
+            "ignore_requires_python": False,
+            "ignore_installed": True,
+            "isolated": False,
+            "wheel_cache": wheel_cache,
+            "use_user_site": False,
+        }
+        resolver = None
+        preparer = None
+        with RequirementTracker() as req_tracker:
+            # Pip 18 uses a requirement tracker to prevent fork bombs
+            if req_tracker:
+                preparer_kwargs["req_tracker"] = req_tracker
+            preparer = RequirementPreparer(**preparer_kwargs)
+            resolver_kwargs["preparer"] = preparer
+            reqset = RequirementSet()
+            ireq.is_direct = True
+            reqset.add_requirement(ireq)
+            resolver = PipResolver(**resolver_kwargs)
+            resolver.require_hashes = False
+            results = resolver._resolve_one(reqset, ireq)
+            reqset.cleanup_files()
 
         return set(results)
 
@@ -307,14 +284,8 @@ class PyPIRepository(BaseRepository):
 
         log.debug("  {}".format(ireq.name))
 
-        def get_candidate_link(candidate):
-            if PIP_VERSION < (19, 2):
-                return candidate.location
-            return candidate.link
-
         return {
-            self._get_file_hash(get_candidate_link(candidate))
-            for candidate in matching_candidates
+            self._get_file_hash(candidate.link) for candidate in matching_candidates
         }
 
     def _get_file_hash(self, link):

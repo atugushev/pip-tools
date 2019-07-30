@@ -6,19 +6,16 @@ from textwrap import dedent
 import mock
 import pytest
 from click.testing import CliRunner
+from pip._internal.utils.misc import path_to_url
 from pytest import mark
 
 from .utils import invoke
 
-from piptools._compat.pip_compat import path_to_url
 from piptools.repositories import PyPIRepository
 from piptools.scripts.compile import cli
-from piptools.utils import PIP_VERSION
 
 TEST_DATA_PATH = os.path.join(os.path.split(__file__)[0], "test_data")
 MINIMAL_WHEELS_PATH = os.path.join(TEST_DATA_PATH, "minimal_wheels")
-
-fail_below_pip9 = pytest.mark.xfail(PIP_VERSION < (9,), reason="needs pip 9 or greater")
 
 
 @pytest.fixture
@@ -513,7 +510,6 @@ def test_generate_hashes_verbose(runner):
     assert expected_verbose_text in out.stderr
 
 
-@fail_below_pip9
 def test_filter_pip_markers(runner):
     """
     Check that pip-compile works with pip environment markers (PEP496)

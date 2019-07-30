@@ -3,15 +3,15 @@ from contextlib import contextmanager
 from functools import partial
 
 from click.testing import CliRunner
+from pip._internal.models.candidate import InstallationCandidate
+from pip._internal.req.constructors import (
+    install_req_from_editable,
+    install_req_from_line,
+)
 from pip._vendor.packaging.version import Version
 from pip._vendor.pkg_resources import Requirement
 from pytest import fixture
 
-from piptools._compat import (
-    InstallationCandidate,
-    install_req_from_editable,
-    install_req_from_line,
-)
 from piptools.cache import DependencyCache
 from piptools.exceptions import NoCandidateFound
 from piptools.repositories import PyPIRepository
