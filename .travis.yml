@@ -93,9 +93,6 @@ jobs:
     - python: 3.8-dev
 
 after_success:
-  - travis_retry pip install codecov coveralls
-  - codecov -n "py${TRAVIS_PYTHON_VERSION}-pip${PIP}-${TRAVIS_OS_NAME}"
-  - "COVERALLS_PARALLEL=true coveralls"
-
-notifications:
-  webhooks: https://coveralls.io/webhook
+  - travis_retry pip install coverage
+  - coverage xml
+  - bash <(curl -s https://codecov.io/bash) -Z -X gcov -X coveragepy -X search -X xcode -X gcovout -X fix -X search -f coverage.xml -n "py${TRAVIS_PYTHON_VERSION}-pip${PIP}-${TRAVIS_OS_NAME}"

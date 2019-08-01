@@ -99,5 +99,5 @@ after_test:
   - IF NOT "x%TOXENV:-coverage=%"=="x%TOXENV%" (
       pip install codecov &&
       coverage xml &&
-      codecov --required -X gcov pycov search -f coverage.xml -n %TOXENV%-windows
+      bash <(curl -s https://codecov.io/bash) -Z -X gcov -X coveragepy -X search -X xcode -X gcovout -X fix -X search -f coverage.xml -n %TOXENV%-windows
     )
