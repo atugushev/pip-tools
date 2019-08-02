@@ -7,9 +7,11 @@ import six
 from pytest import mark, raises
 from six.moves import shlex_quote
 
+from piptools._compat import InstallCommand
 from piptools.scripts.compile import cli as compile_cli
 from piptools.utils import (
     as_tuple,
+    create_install_command,
     dedup,
     flat_map,
     force_text,
@@ -324,3 +326,11 @@ def test_get_compile_command_sort_args(tmpdir_cwd):
             "--no-annotate --no-emit-trusted-host --no-index "
             "requirements.in setup.py"
         )
+
+
+def test_create_install_command():
+    """
+    Test create_install_command returns an instance of InstallCommand.
+    """
+    install_command = create_install_command()
+    assert isinstance(install_command, InstallCommand)
