@@ -1,3 +1,5 @@
+image: Visual Studio 2017
+
 environment:
     global:
       PYTHON: "C:\\Python36"
@@ -96,8 +98,8 @@ test_script:
 after_test:
   # Add tox environment to PATH.
   - "SET PATH=%CD%\\.tox\\%TOXENV%\\scripts;%PATH%"
-  - IF NOT "x%TOXENV:-coverage=%"=="x%TOXENV%" (
-      pip install codecov &&
-      coverage xml &&
-      bash <(curl -s https://codecov.io/bash) -Z -X gcov -X coveragepy -X search -X xcode -X gcovout -X fix -X search -f coverage.xml -n %TOXENV%-windows
-    )
+  - coverage xml
+  - bash -lc "exec 0</dev/null &&
+    curl --retry 5 --silent --fail -o /tmp/codecov.bash https://codecov.io/bash &&
+    chmod +x /tmp/codecov.bash &&
+    /tmp/codecov.bash -Z -X gcov -X coveragepy -X search -X xcode -X gcovout -X fix -X search -f coverage.xml -n %TOXENV%-windows "
