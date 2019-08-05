@@ -11,7 +11,7 @@ from click.utils import LazyFile
 from pip._vendor.packaging.version import parse as parse_version
 from six.moves import shlex_quote
 
-from ._compat import InstallCommand, install_req_from_line
+from ._compat import install_req_from_line
 from .click import style
 
 PIP_VERSION = tuple(map(int, parse_version(pip.__version__).base_version.split(".")))
@@ -378,6 +378,8 @@ def create_install_command():
     Return an instance of InstallCommand.
     """
     if PIP_VERSION < (19, 3):
+        from pip._internal.commands.install import InstallCommand
+
         return InstallCommand()
 
     from pip._internal import create_command

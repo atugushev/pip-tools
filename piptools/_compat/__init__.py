@@ -9,7 +9,6 @@ from .pip_compat import (
     FAVORITE_HASH,
     FormatControl,
     InstallationCandidate,
-    InstallCommand,
     InstallRequirement,
     Link,
     PackageFinder,

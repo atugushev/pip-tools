@@ -7,7 +7,6 @@ import six
 from pytest import mark, raises
 from six.moves import shlex_quote
 
-from piptools._compat import InstallCommand
 from piptools.scripts.compile import cli as compile_cli
 from piptools.utils import (
     as_tuple,
@@ -333,4 +332,4 @@ def test_create_install_command():
     Test create_install_command returns an instance of InstallCommand.
     """
     install_command = create_install_command()
-    assert isinstance(install_command, InstallCommand)
+    assert install_command.name == "install"

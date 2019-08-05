@@ -40,7 +40,6 @@ url_to_path = do_import("download", "url_to_path")
 PackageFinder = do_import("index", "PackageFinder")
 FormatControl = do_import("index", "FormatControl")
 Wheel = do_import("wheel", "Wheel")
-InstallCommand = do_import("commands.install", "InstallCommand")
 cmdoptions = do_import("cli.cmdoptions", old_path="cmdoptions")
 get_installed_distributions = do_import(
     "utils.misc", "get_installed_distributions", old_path="utils"
