@@ -9,5 +9,5 @@ install:
 build: false
 
 test_script:
-    - pip install --upgrade pip
-    #- pip install --upgrade briefcase
+  # - pip install --upgrade pip
+  - pip install --upgrade briefcase
