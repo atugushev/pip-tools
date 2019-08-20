@@ -140,7 +140,7 @@ def test_setuptools_with_env_markers(pip_conf, runner, str_attrs):
     with open("setup.py", "w") as setup:
         setup.write("from setuptools import setup\nsetup({})".format(str_attrs))
 
-    out = runner.invoke(cli)
+    out = runner.invoke(cli, catch_exceptions=False)
 
     expected_line = 'small-fake-a==0.1 ; python_version >= "2.7"'
     assert out.exit_code == 0
