@@ -3,25 +3,6 @@ environment:
       PYTHON: "C:\\Python36"
 
     matrix:
-        - TOXENV: py27-pip8.1.1-coverage
-          PIP: 8.1.1
-        - TOXENV: py27-pip9.0.1
-          PIP: 9.0.1
-        - TOXENV: py27-pip9.0.3
-          PIP: 9.0.3
-        - TOXENV: py27-pip10.0.1
-          PIP: 10.0.1
-        - TOXENV: py27-pip18.0
-          PIP: 18.0
-        - TOXENV: py27-pip19.0.3
-          PIP: 19.0.3
-        - TOXENV: py27-pip19.1
-          PIP: 19.1
-        - TOXENV: py27-pipmaster
-          PIP: master
-        - TOXENV: py27-piplatest-coverage
-          PIP: latest
-
         - TOXENV: py35-pip8.1.1
           PIP: 8.1.1
         - TOXENV: py35-pip9.0.1
@@ -80,7 +61,6 @@ environment:
           PIP: latest
 
 matrix:
-  fast_finish: true
   allow_failures:
     - PIP: master
 
@@ -91,7 +71,7 @@ install:
 build: false
 
 test_script:
-    - tox
+    - tox -- -k test_diff_with_editable
 
 after_test:
   # Add tox environment to PATH.
