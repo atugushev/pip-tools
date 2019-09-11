@@ -1,4 +1,2 @@
 -e .
-mock
-pytest
-wheel
+-r tools/tests-requirements.txt
