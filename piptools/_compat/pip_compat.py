@@ -51,6 +51,7 @@ DEV_PKGS = do_import("commands.freeze", "DEV_PKGS")
 Link = do_import("models.link", "Link", old_path="index")
 Session = do_import("_vendor.requests.sessions", "Session")
 Resolver = do_import("legacy_resolve", "Resolver", old_path="resolve")
+check_path_owner = do_import("utils.filesystem", "check_path_owner")
 
 # pip 18.1 has refactored InstallRequirement constructors use by pip-tools.
 if parse_version(pip.__version__) < parse_version("18.1"):

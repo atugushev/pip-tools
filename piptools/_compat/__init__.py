@@ -17,6 +17,7 @@ from .pip_compat import (
     RequirementSet,
     Resolver,
     Wheel,
+    check_path_owner,
     cmdoptions,
     get_installed_distributions,
     install_req_from_editable,

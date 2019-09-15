@@ -7,8 +7,10 @@ import sys
 
 from pip._vendor.packaging.requirements import Requirement
 
+from ._compat import check_path_owner
 from .exceptions import PipToolsError
 from .locations import CACHE_DIR
+from .logging import log
 from .utils import as_tuple, key_from_req, lookup_table
 
 
@@ -52,13 +54,30 @@ class DependencyCache(object):
     def __init__(self, cache_dir=None):
         if cache_dir is None:
             cache_dir = CACHE_DIR
-        if not os.path.isdir(cache_dir):
-            os.makedirs(cache_dir)
-        py_version = ".".join(str(digit) for digit in sys.version_info[:2])
-        cache_filename = "depcache-py{}.json".format(py_version)
 
-        self._cache_file = os.path.join(cache_dir, cache_filename)
+        if check_path_owner(cache_dir):
+            if not os.path.isdir(cache_dir):
+                os.makedirs(cache_dir)
+            py_version = ".".join(str(digit) for digit in sys.version_info[:2])
+            cache_filename = "depcache-py{}.json".format(py_version)
+            self._cache_file = os.path.join(cache_dir, cache_filename)
+        else:
+            log.warning(
+                "The directory '{}' is not owned by the current user "
+                "and the cache has been disabled.".format(cache_dir)
+            )
+
+            # Set _cache_file to None to disable the cache
+            self._cache_file = None
+
         self._cache = None
+
+    @property
+    def is_enabled(self):
+        """
+        Returns whether the cache is enabled.
+        """
+        return self._cache_file is not None
 
     @property
     def cache(self):
@@ -92,13 +111,16 @@ class DependencyCache(object):
 
     def read_cache(self):
         """Reads the cached contents into memory."""
-        if os.path.exists(self._cache_file):
+        if self.is_enabled and os.path.exists(self._cache_file):
             self._cache = read_cache_file(self._cache_file)
         else:
             self._cache = {}
 
     def write_cache(self):
         """Writes the cache to disk as JSON."""
+        # Cache is disabled
+        if not self.is_enabled:
+            return
         doc = {"__format__": 1, "dependencies": self._cache}
         with open(self._cache_file, "w") as f:
             json.dump(doc, f, sort_keys=True)

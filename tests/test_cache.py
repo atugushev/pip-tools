@@ -3,6 +3,7 @@ from os import remove
 from shutil import rmtree
 from tempfile import NamedTemporaryFile
 
+import mock
 from pytest import raises
 
 from piptools.cache import CorruptCacheError, DependencyCache, read_cache_file
@@ -105,3 +106,19 @@ def test_reverse_dependencies(from_line, tmpdir):
 
     # Clean up our temp directory
     rmtree(tmp_dir_path)
+
+
+@mock.patch("piptools.cache.check_path_owner", new=lambda *args: False)
+@mock.patch("piptools.cache.log")
+def test_user_cannot_write_cache(log, tmpdir):
+    """
+    Test that user cannot write cache without permission to the cache directory.
+    """
+    cache_dir = str(tmpdir)
+    cache = DependencyCache(cache_dir=cache_dir)
+    expected_message = (
+        "The directory '{}' is not owned by the current user "
+        "and the cache has been disabled.".format(cache_dir)
+    )
+    assert not cache.is_enabled
+    log.warning.assert_called_once_with(expected_message)
