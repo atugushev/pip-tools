@@ -23,9 +23,6 @@ stages:
   if: repo = jazzband/pip-tools AND tag IS present
 
 jobs:
-  exclude:
-    - env: PIP=master
-
   include:
     - stage: deploy
       install: skip  # No need to install tox-travis on deploy.
