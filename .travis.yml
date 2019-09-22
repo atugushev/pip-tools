@@ -35,6 +35,7 @@ jobs:
     - stage: test master
       if: type = cron
       env: PIP=master
+      allow_failures: false
 
     - stage: deploy
       install: skip  # No need to install tox-travis on deploy.
