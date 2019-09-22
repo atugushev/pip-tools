@@ -40,7 +40,9 @@ jobs:
           tags: true
           repo: jazzband/pip-tools
   allow_failures:
-    - env: PIP=master TRAVIS_EVENT_TYPE=push
+    - env:
+      PIP: master
+      TRAVIS_EVENT_TYPE: push
     - python: 3.8-dev
 
 after_success:
