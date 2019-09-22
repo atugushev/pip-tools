@@ -27,17 +27,6 @@ jobs:
     - env: PIP=master
 
   include:
-    - stage: test master
-      if: type != cron
-      env: PIP=master
-      allow_failures: true
-
-    - stage: test master
-      name: 'Non allow failures'
-      if: type = cron
-      env: PIP=master
-      allow_failures: false
-
     - stage: deploy
       install: skip  # No need to install tox-travis on deploy.
       script: skip  # No test on the deploy stage.
@@ -56,7 +45,7 @@ jobs:
           repo: jazzband/pip-tools
 
   allow_failures:
-    - env: PIP=master
+    - env: PIP=master TRAVIS_EVENT_TYPE=push
 
 after_success:
   - travis_retry pip install codecov coveralls
