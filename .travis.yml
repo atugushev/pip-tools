@@ -7,7 +7,6 @@ python:
 env:
   # NOTE: keep this in sync with envlist in tox.ini for tox-travis.
   - PIP=latest
-  - PIP=master
 
 cache: false
 install:
