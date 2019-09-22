@@ -7,6 +7,7 @@ python:
 env:
   # NOTE: keep this in sync with envlist in tox.ini for tox-travis.
   - PIP=latest
+  - PIP=master
 
 cache: false
 install:
@@ -22,6 +23,9 @@ stages:
   if: repo = jazzband/pip-tools AND tag IS present
 
 jobs:
+  exclude:
+    - env: PIP=master
+ 
   include:
     - stage: test master
       env: PIP=master
