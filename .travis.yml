@@ -33,6 +33,7 @@ jobs:
       allow_failures: true
 
     - stage: test master
+      name: 'Non allow failures'
       if: type = cron
       env: PIP=master
       allow_failures: false
@@ -53,6 +54,9 @@ jobs:
         on:
           tags: true
           repo: jazzband/pip-tools
+
+  allow_failures:
+    - env: PIP=master
 
 after_success:
   - travis_retry pip install codecov coveralls
