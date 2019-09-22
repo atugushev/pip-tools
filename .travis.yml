@@ -42,7 +42,7 @@ jobs:
           repo: jazzband/pip-tools
 
   allow_failures:
-    - env: TRAVIS_EVENT_TYPE=push
+    - type: push
 
 after_success:
   - travis_retry pip install codecov coveralls
