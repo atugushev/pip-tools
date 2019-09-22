@@ -4,9 +4,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import collections
 import hashlib
 import os
-from contextlib import contextmanager
 from functools import partial
 from shutil import rmtree
+
+from contextlib2 import contextmanager, nullcontext
 
 from .._compat import (
     FAVORITE_HASH,
@@ -16,7 +17,6 @@ from .._compat import (
     Resolver as PipResolver,
     TemporaryDirectory,
     Wheel,
-    contextlib,
     is_dir_url,
     is_file_url,
     is_vcs_url,
@@ -347,7 +347,7 @@ class PyPIRepository(BaseRepository):
                 iter_length = f.size / FILE_CHUNK_SIZE if f.size else None
                 context_manager = progressbar(chunks, length=iter_length, label="  ")
             else:
-                context_manager = contextlib.nullcontext(chunks)
+                context_manager = nullcontext(chunks)
 
             # Iterate over the chosen context manager
             with context_manager as bar:
