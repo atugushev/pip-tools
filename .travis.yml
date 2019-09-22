@@ -13,6 +13,7 @@ cache: false
 install:
   - travis_retry pip install tox-travis
 script:
+  - echo $TRAVIS_EVENT_TYPE
   - tox -- tests/test_cli_compile.py -k test_editable_package_vcs
 
 stages:
@@ -42,7 +43,7 @@ jobs:
           repo: jazzband/pip-tools
 
   allow_failures:
-    - type: push
+    - env: TRAVIS_EVENT_TYPE=push
 
 after_success:
   - travis_retry pip install codecov coveralls
