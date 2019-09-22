@@ -13,16 +13,21 @@ cache: false
 install:
   - travis_retry pip install tox-travis
 script:
-  - tox
+  - tox -- tests/test_cli_compile.py -k test_editable_package_vcs
 
 stages:
 - baseline
 - test
+- test master
 - name: deploy
   if: repo = jazzband/pip-tools AND tag IS present
 
 jobs:
   include:
+    - stage: test master
+      env: PIP=master
+      allow_failures: true
+ 
     - stage: deploy
       install: skip  # No need to install tox-travis on deploy.
       script: skip  # No test on the deploy stage.
@@ -39,11 +44,6 @@ jobs:
         on:
           tags: true
           repo: jazzband/pip-tools
-  allow_failures:
-    - env:
-      PIP: master
-      TRAVIS_EVENT_TYPE: push
-    - python: 3.8-dev
 
 after_success:
   - travis_retry pip install codecov coveralls
