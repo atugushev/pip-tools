@@ -1,18 +1,17 @@
 name: cron
 
 on:
-  schedule:
-  # Run every day at 00:00 UTC
-  - cron: 0 0 * * *
+  push:
+  pull_request:
 
 jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [2.7, 3.5, 3.6, 3.7]
+        python-version: [3.7]
         env:
-        - TOXENV: pipmaster
+        - TOXENV: checkqa
         os: [ubuntu-latest, windows-latest]
 
     steps:
