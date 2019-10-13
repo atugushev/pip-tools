@@ -7,6 +7,7 @@ from collections import Counter
 import mock
 import pytest
 
+from piptools._compat import path_to_url
 from piptools.exceptions import IncompatibleRequirements
 from piptools.sync import dependency_tree, diff, merge, sync
 
@@ -247,7 +248,7 @@ def test_diff_with_editable(fake_dist, from_editable):
     assert len(to_install) == 1
     package = list(to_install)[0]
     assert package.editable
-    assert str(package.link) == _get_file_url(path_to_package)
+    assert str(package.link) == path_to_url(path_to_package)
 
 
 def test_diff_with_matching_url_versions(fake_dist, from_line):
