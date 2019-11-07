@@ -106,7 +106,7 @@ install:
 build: false
 
 test_script:
-    - tox
+    - tox -- -k test_realistic_complex_sub_dependencies
 
 after_test:
   # Add tox environment to PATH.
