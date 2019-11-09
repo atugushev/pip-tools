@@ -236,6 +236,7 @@ def test_realistic_complex_sub_dependencies(runner):
         req_in.write("fake_with_deps")  # require fake package
 
     out = runner.invoke(cli, ["-v", "-n", "--rebuild", "-f", wheels_dir])
+    print(out.stderr_bytes)
 
     assert out.exit_code == 0
 
