@@ -2,6 +2,8 @@ import os
 
 import pytest
 
+from .constants import MINIMAL_WHEELS_PATH
+
 from piptools.repositories import PyPIRepository
 
 
@@ -17,7 +19,7 @@ class MockedPyPIRepository(PyPIRepository):
 
 @pytest.fixture
 def mocked_repository():
-    return MockedPyPIRepository(["--index-url", PyPIRepository.DEFAULT_INDEX_URL])
+    return MockedPyPIRepository(["--no-index", "--find-links", MINIMAL_WHEELS_PATH])
 
 
 @pytest.mark.parametrize(
@@ -34,12 +36,11 @@ def mocked_repository():
                         "small_fake_with_deps",
                     )
                 ],
-                ["six"],
+                ["small-fake-a"],
             )
         ]
     ),
 )
-@pytest.mark.network
 def test_editable_top_level_deps_preserved(
     base_resolver, mocked_repository, from_editable, input, expected
 ):
