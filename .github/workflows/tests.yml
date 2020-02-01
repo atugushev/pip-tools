@@ -1,4 +1,4 @@
-name: ci
+name: tests
 
 on:
   push:
@@ -7,33 +7,7 @@ on:
   pull_request:
 
 jobs:
-#  qa:
-#    runs-on: ubuntu-latest
-#    strategy:
-#      matrix:
-#        env:
-#          - TOXENV: checkqa
-#          - TOXENV: readme
-#    steps:
-#      - uses: actions/checkout@master
-#      - name: Set up Python ${{ matrix.python-version }}
-#        uses: actions/setup-python@v1
-#        with:
-#          python-version: 3.8
-#      - name: Set PY
-#        run: echo "::set-env name=PY::$(python -VV | sha256sum | cut -d' ' -f1)"
-#      - uses: actions/cache@v1
-#        with:
-#          path: ~/.cache/pre-commit
-#          key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
-#      - name: Install tox
-#        run: pip install tox
-#      - name: Test with tox ${{ matrix.env.TOXENV }}
-#        env: ${{ matrix.env }}
-#        run: tox
-
   tests:
-#    needs: [qa]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -53,6 +27,15 @@ jobs:
           - TOXENV: pip9.0.1-coverage
           - TOXENV: pip8.1.1-coverage
         os: [ubuntu-latest, windows-latest]
+        exclude:
+          - python-version: 3.8
+            os: ubuntu-latest
+            env:
+              TOXENV: pip8.1.1-coverage
+          - python-version: 3.8
+            os: windows-latest
+            env:
+              TOXENV: pip8.1.1-coverage
     steps:
       - uses: actions/checkout@master
       - name: Set up Python ${{ matrix.python-version }}
@@ -65,7 +48,7 @@ jobs:
         env: ${{ matrix.env }}
         run: tox
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v1.0.5
         with:
           file: ./coverage.xml
           name: py${{ matrix.python-version }}-${{ matrix.env.TOXENV }}-${{ matrix.os }}
@@ -73,4 +56,4 @@ jobs:
           # it's only using for upload reports. See also:
           #   https://github.com/codecov/codecov-action/issues/11
           #   https://github.com/codecov/codecov-python/issues/209
-          token: 0fb9464e-0726-4927-b941-b2253e62e833
+          token: 18eb7673-805f-424d-88c0-220754279f0a
