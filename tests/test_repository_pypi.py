@@ -1,8 +1,11 @@
+import os
+
 import mock
 import pytest
 
 from piptools._compat import PackageFinder
 from piptools._compat.pip_compat import PIP_VERSION, Link, Session, path_to_url
+from piptools.repositories import PyPIRepository
 from piptools.repositories.pypi import open_local_or_remote_file
 
 
@@ -176,3 +179,18 @@ def test_wheel_cache_cleanup_called(
     ireq = from_line("six==1.10.0")
     pypi_repository.get_dependencies(ireq)
     WheelCache.return_value.cleanup.assert_called_once_with()
+
+
+@mock.patch("piptools.repositories.pypi.PyPIRepository.resolve_reqs")  # to run offline
+@mock.patch("piptools.repositories.pypi.WheelCache")
+def test_relative_path_cache_dir(WheelCache, resolve_reqs, from_line):
+    relative_cache_dir = "pypi-repo-cache"
+    pypi_repository = PyPIRepository(
+        ["--index-url", PyPIRepository.DEFAULT_INDEX_URL], cache_dir=relative_cache_dir
+    )
+    ireq = from_line("six==1.10.0")
+    pypi_repository.get_dependencies(ireq)
+    WheelCache.assert_called_once()
+    cache_dir = WheelCache.call_args[0][0]
+    assert os.path.isabs(cache_dir)
+    assert cache_dir.endswith(relative_cache_dir)
