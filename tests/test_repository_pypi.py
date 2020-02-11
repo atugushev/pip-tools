@@ -181,16 +181,19 @@ def test_wheel_cache_cleanup_called(
     WheelCache.return_value.cleanup.assert_called_once_with()
 
 
-@mock.patch("piptools.repositories.pypi.PyPIRepository.resolve_reqs")  # to run offline
-@mock.patch("piptools.repositories.pypi.WheelCache")
-def test_relative_path_cache_dir(WheelCache, resolve_reqs, from_line):
+def test_relative_path_cache_dir_is_normalized(from_line):
     relative_cache_dir = "pypi-repo-cache"
+    pypi_repository = PyPIRepository([], cache_dir=relative_cache_dir)
+
+    assert os.path.isabs(pypi_repository._cache_dir)
+    assert pypi_repository._cache_dir.endswith(relative_cache_dir)
+
+
+def test_relative_path_pip_cache_dir_is_normalized(from_line, tmpdir):
+    relative_cache_dir = "pip-cache"
     pypi_repository = PyPIRepository(
-        ["--index-url", PyPIRepository.DEFAULT_INDEX_URL], cache_dir=relative_cache_dir
+        ["--cache-dir", relative_cache_dir], cache_dir=str(tmpdir / "pypi-repo-cache")
     )
-    ireq = from_line("six==1.10.0")
-    pypi_repository.get_dependencies(ireq)
-    WheelCache.assert_called_once()
-    cache_dir = WheelCache.call_args[0][0]
-    assert os.path.isabs(cache_dir)
-    assert cache_dir.endswith(relative_cache_dir)
+
+    assert os.path.isabs(pypi_repository.options.cache_dir)
+    assert pypi_repository.options.cache_dir.endswith(relative_cache_dir)
