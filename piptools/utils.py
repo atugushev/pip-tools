@@ -79,8 +79,9 @@ def format_requirement(ireq, marker=None, hashes=None):
     """
     if ireq.editable:
         line = "-e {}".format(ireq.link.url)
-    elif is_url_requirement(ireq):
-        line = ireq.link.url
+    # FIXME ireq.original_link is always populated now
+    # elif is_url_requirement(ireq):
+    #    line = ireq.link.url
     else:
         line = str(ireq.req).lower()
 

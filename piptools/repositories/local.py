@@ -50,6 +50,10 @@ class LocalRequirementsRepository(BaseRepository):
         return self.repository.session
 
     @property
+    def command(self):
+        return self.repository.command
+
+    @property
     def DEFAULT_INDEX_URL(self):
         return self.repository.DEFAULT_INDEX_URL
 

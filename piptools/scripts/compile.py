@@ -21,6 +21,7 @@ from ..locations import CACHE_DIR
 from ..logging import log
 from ..repositories import LocalRequirementsRepository, PyPIRepository
 from ..resolver import Resolver
+from ..new_resolver import NewResolver
 from ..utils import UNSAFE_PACKAGES, dedup, is_pinned_requirement, key_from_ireq
 from ..writer import OutputWriter
 
@@ -215,6 +216,11 @@ class BaseCommand(Command):
 )
 @click.option("--pip-args", help="Arguments to pass directly to the pip command.")
 @click.option(
+    "--new-resolver/--no-new-resolver",
+    is_flag=True,
+    default=True,
+)
+@click.option(
     "--emit-index-url/--no-emit-index-url",
     is_flag=True,
     default=True,
@@ -249,6 +255,7 @@ def cli(
     emit_find_links,
     cache_dir,
     pip_args,
+    new_resolver,
     emit_index_url,
 ):
     """Compiles requirements.txt from requirements.in specs."""
@@ -322,9 +329,10 @@ def cli(
         pip_args.extend(["--pre"])
     for host in trusted_host:
         pip_args.extend(["--trusted-host", host])
-
     if not build_isolation:
         pip_args.append("--no-build-isolation")
+    if new_resolver:
+        pip_args.extend(["--use-feature", "2020-resolver"])
     pip_args.extend(right_args)
 
     repository = PyPIRepository(pip_args, cache_dir=cache_dir)
@@ -336,6 +344,10 @@ def cli(
     }
 
     existing_pins_to_upgrade = set()
+
+    # Exclude packages from --upgrade-package/-P from the existing
+    # constraints, and separately gather pins to be upgraded
+    existing_pins = {}
 
     # Proxy with a LocalRequirementsRepository if --upgrade is not specified
     # (= default invocation)
@@ -350,9 +362,6 @@ def cli(
             options=tmp_repository.options,
         )
 
-        # Exclude packages from --upgrade-package/-P from the existing
-        # constraints, and separately gather pins to be upgraded
-        existing_pins = {}
         for ireq in filter(is_pinned_requirement, ireqs):
             key = key_from_ireq(ireq)
             if key in upgrade_install_reqs:
@@ -362,6 +371,8 @@ def cli(
         repository = LocalRequirementsRepository(
             existing_pins, repository, reuse_hashes=reuse_hashes
         )
+
+        print('existing pins:', existing_pins)
 
     ###
     # Parsing/collecting initial requirements
@@ -435,8 +446,24 @@ def cli(
             for find_link in dedup(repository.finder.find_links):
                 log.debug(redact_auth_from_url(find_link))
 
+    resolver_cls = NewResolver if new_resolver else Resolver
+
+    if existing_pins:
+        print('constraints before:', constraints)
+        existing_constraints = list(existing_pins.values())
+        for c in constraints:
+            c.user_supplied = True
+
+        for c in existing_constraints:
+            c.constraint = True
+            c.user_supplied = False
+
+        constraints.extend(existing_constraints)
+        print('constraints after:', constraints)
+
+
     try:
-        resolver = Resolver(
+        resolver = resolver_cls(
             constraints,
             repository,
             prereleases=repository.finder.allow_all_prereleases or pre,
