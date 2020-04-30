@@ -153,20 +153,45 @@ def test_trusted_host(pip_conf, runner):
     assert "--trusted-host example.com\n" "--trusted-host example2.com\n" in out.stderr
 
 
-def test_trusted_host_no_emit(pip_conf, runner):
+@pytest.mark.parametrize(
+    "options",
+    (
+        pytest.param(
+            ["--trusted-host", "example.com", "--no-emit-trusted-host"],
+            id="trusted host",
+        ),
+        pytest.param(
+            ["--find-links", "wheels", "--no-emit-find-links"], id="find links"
+        ),
+        pytest.param(
+            ["--index-url", "https://index-url", "--no-emit-index-url"], id="index url"
+        ),
+    ),
+)
+def test_all_no_emit_options(runner, options):
     with open("requirements.in", "w"):
         pass
-    out = runner.invoke(
-        cli, ["-v", "--trusted-host", "example.com", "--no-emit-trusted-host"]
-    )
-    assert "--trusted-host example.com" not in out.stderr
+    out = runner.invoke(cli, ["--no-header"] + options)
+    assert out.stderr.strip().splitlines() == []
 
 
-def test_find_links_no_emit(pip_conf, runner):
+@pytest.mark.parametrize(
+    "option, expected_output",
+    (
+        pytest.param("--index", ["--index-url https://index-url"], id="index url"),
+        pytest.param("--no-index", [], id="no index"),
+    ),
+)
+def test_index_option(runner, option, expected_output):
     with open("requirements.in", "w"):
         pass
-    out = runner.invoke(cli, ["-v", "--no-emit-find-links"])
-    assert "--find-links" not in out.stderr
+
+    with pytest.deprecated_call():
+        out = runner.invoke(
+            cli, ["--no-header", "--index-url", "https://index-url", option]
+        )
+
+    assert out.stderr.strip().splitlines() == expected_output
 
 
 @pytest.mark.network
@@ -199,7 +224,6 @@ def test_run_as_module_compile():
     status, output = invoke([sys.executable, "-m", "piptools", "compile", "--help"])
 
     # Should have run pip-compile successfully.
-    output = output.decode("utf-8")
     assert output.startswith("Usage:")
     assert "Compiles requirements.txt from requirements.in" in output
     assert status == 0
@@ -614,7 +638,6 @@ def test_no_candidates_pre(pip_conf, runner):
 
 def test_default_index_url(pip_with_index_conf):
     status, output = invoke([sys.executable, "-m", "piptools", "compile", "--help"])
-    output = output.decode("utf-8")
 
     # Click's subprocess output has \r\r\n line endings on win py27. Fix it.
     output = output.replace("\r\r", "\r")

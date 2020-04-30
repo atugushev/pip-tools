@@ -14,7 +14,6 @@ def test_run_as_module_sync():
     status, output = invoke([sys.executable, "-m", "piptools", "sync", "--help"])
 
     # Should have run pip-compile successfully.
-    output = output.decode("utf-8")
     assert output.startswith("Usage:")
     assert "Synchronize virtual environment with" in output
     assert status == 0

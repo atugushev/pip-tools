@@ -12,6 +12,5 @@ def test_remove_legacy_cache_dir():
 
     status, output = invoke([sys.executable, "-m", "piptools"])
 
-    output = output.decode("utf-8")
     assert output.startswith("Removing old cache dir")
     assert status == 0

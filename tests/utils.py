@@ -1,10 +1,12 @@
 import subprocess
 
 
-def invoke(command):
+def invoke(command, **kwargs):
     """Invoke sub-process."""
     try:
-        output = subprocess.check_output(command, stderr=subprocess.STDOUT)
+        output = subprocess.check_output(
+            command, stderr=subprocess.STDOUT, universal_newlines=True, **kwargs
+        )
         status = 0
     except subprocess.CalledProcessError as error:  # pragma: no cover
         output = error.output
