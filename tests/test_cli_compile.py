@@ -644,10 +644,8 @@ def test_default_index_url(pip_with_index_conf):
 
     assert status == 0
     expected = (
-        "  -i, --index-url TEXT            Change index URL (defaults to"
-        + os.linesep
-        + "                                  http://example.com)"
-        + os.linesep
+        "  -i, --index-url TEXT            Change index URL (defaults to\n\n"
+        + "                                  http://example.com)\n\n"
     )
     assert expected in output
 
