@@ -35,18 +35,18 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
+        os:
+          - Ubuntu
+          - Windows
         python-version:
           - 2.7
           - 3.5
           - 3.6
           - 3.7
           - 3.8
-        toxenv:
-          - piplatest
-          - pip20.0
-        os:
-          - Ubuntu
-          - Windows
+        pip-version:
+          - "20.0"
+          - "latest"
     steps:
       - uses: actions/checkout@master
       - name: Set up Python ${{ matrix.python-version }}
@@ -55,28 +55,28 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install tox
         run: pip install tox
-      - name: Test ${{ matrix.toxenv }}
-        run: tox -e ${{ matrix.toxenv }}-coverage
+      - name: Test pip ${{ matrix.pip-version }}
+        run: tox -e pip${{ matrix.pip-version }}-coverage
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1.0.6
         with:
           file: ./coverage.xml
-          name: ${{ matrix.python-version }}-${{ matrix.toxenv }}-${{ matrix.os }}
+          name: ${{ matrix.os }}-${{ matrix.python-version }}-${{ matrix.pip-version }}
 
   pypy:
     name: Test
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        python-version:
-          - pypy2
-          - pypy3
-        # Test pypy only with the latest pip to reduce the number of jobs
-        toxenv:
-          - piplatest
         os:
           - Ubuntu
           - Windows
+        python-version:
+          - pypy2
+          - pypy3
+        # Test pypy only with the latest pip version to reduce the number of jobs
+        pip-version:
+          - latest
     steps:
       - uses: actions/checkout@master
       - name: Set up Python ${{ matrix.python-version }}
@@ -85,5 +85,5 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install tox
         run: pip install tox
-      - name: Test ${{ matrix.toxenv }}
-        run: tox -e ${{ matrix.toxenv }}
+      - name: Test pip ${{ matrix.pip-version }}
+        run: tox -e pip${{ matrix.pip-version }}
