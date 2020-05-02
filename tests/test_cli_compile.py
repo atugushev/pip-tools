@@ -638,7 +638,7 @@ def test_no_candidates_pre(pip_conf, runner):
 
 def test_default_index_url(pip_with_index_conf):
     status, output = invoke([sys.executable, "-m", "piptools", "compile", "--help"])
-
+    print(repr(output))
     # Click's subprocess output has \r\r\n line endings on win py27. Fix it.
     # output = output.replace("\r\r", "\r")
 
