@@ -3,8 +3,6 @@ name: CI
 on:
   pull_request:
   push:
-    branches:
-      - master
 
 jobs:
   qa:
@@ -47,6 +45,15 @@ jobs:
         pip-version:
           - "20.0"
           - "latest"
+        exclude:
+          - os: Windows
+            python-version: pypy
+          - os: Windows
+            python-version: pypy3
+          - pip-version: "20.0"
+            python-version: pypy
+          - pip-version: "20.0"
+            python-version: pypy3
     steps:
       - uses: actions/checkout@master
       - name: Set up Python ${{ matrix.python-version }}
