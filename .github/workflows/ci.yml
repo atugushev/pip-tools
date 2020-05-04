@@ -13,6 +13,9 @@ on:
 jobs:
   test:
     name: ${{ matrix.os }} / ${{ matrix.python-version }} / ${{ matrix.pip-version }}
+    if: >-
+      !startsWith(matrix.python-version, 'pypy') ||
+      github.event_name != 'pull_request'
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
