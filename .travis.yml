@@ -11,7 +11,8 @@ env:
 
 cache: false
 install:
-  - travis_retry pip install tox-travis setuptools>=42
+  - pip freeze | grep setuptools
+  - travis_retry pip install tox-travis "setuptools>=42"
 script:
   - tox
 
