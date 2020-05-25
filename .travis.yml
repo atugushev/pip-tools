@@ -3,10 +3,6 @@ sudo: false
 language: python
 python:
   - "2.7"
-  - "3.5"
-  - "3.6"
-  - "3.7"
-  - "3.8"
 
 env:
   # NOTE: keep this in sync with envlist in tox.ini for tox-travis.
@@ -17,7 +13,7 @@ cache: false
 install:
   - travis_retry pip install tox-travis
 script:
-  - tox
+  - tox -vv
 
 stages:
 - test
