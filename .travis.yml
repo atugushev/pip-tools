@@ -11,7 +11,7 @@ env:
 
 cache: false
 install:
-  - travis_retry pip install tox-travis "setuptools>=42"
+  - travis_retry pip install -U tox-travis setuptools virtualenv
 script:
   - tox
 
