@@ -19,21 +19,10 @@ jobs:
       matrix:
         os:
           - Ubuntu
-          - Windows
-          - macOS
         python-version:
-          - 3.8
-          - 2.7
-          - 3.5
-          - 3.6
-          - 3.7
+          - "3.9-dev"
         pip-version:
           - "latest"
-          - "20.1"
-        include:
-          - os: Ubuntu
-            python-version: 3.9-dev
-            pip-version: latest
 
     env:
       PY_COLORS: 1
