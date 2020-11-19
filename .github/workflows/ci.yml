@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - test-action
     tags:
   schedule:
     # Run everyday at 03:53 UTC
