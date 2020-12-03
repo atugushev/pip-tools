@@ -331,6 +331,8 @@ def cli(
         pip_args.append("--no-build-isolation")
     if new_resolver:
         pip_args.extend(["--use-feature", "2020-resolver"])
+    else:
+        pip_args.extend(["--use-deprecated", "legacy-resolver"])
     pip_args.extend(right_args)
 
     repository = PyPIRepository(pip_args, cache_dir=cache_dir)
@@ -369,8 +371,6 @@ def cli(
         repository = LocalRequirementsRepository(
             existing_pins, repository, reuse_hashes=reuse_hashes
         )
-
-        print("existing pins:", existing_pins)
 
     ###
     # Parsing/collecting initial requirements
@@ -446,18 +446,18 @@ def cli(
 
     resolver_cls = NewResolver if new_resolver else Resolver
 
-    if existing_pins:
-        print("constraints before:", constraints)
-        existing_constraints = list(existing_pins.values())
-        for c in constraints:
-            c.user_supplied = True
+    if new_resolver and existing_pins:
+        # Mark direct/primary/user_supplied packages
+        for ireq in constraints:
+            ireq.user_supplied = True
 
-        for c in existing_constraints:
-            c.constraint = True
-            c.user_supplied = False
+        # Pass compiled requirements from `requirements.txt` as constraints to resolver
+        existing_constraints = list(existing_pins.values())
+        for ireq in existing_constraints:
+            ireq.constraint = True
+            ireq.user_supplied = False
 
         constraints.extend(existing_constraints)
-        print("constraints after:", constraints)
 
     try:
         resolver = resolver_cls(
