@@ -19,9 +19,9 @@ from ..cache import DependencyCache
 from ..exceptions import PipToolsError
 from ..locations import CACHE_DIR
 from ..logging import log
+from ..new_resolver import NewResolver
 from ..repositories import LocalRequirementsRepository, PyPIRepository
 from ..resolver import Resolver
-from ..new_resolver import NewResolver
 from ..utils import UNSAFE_PACKAGES, dedup, is_pinned_requirement, key_from_ireq
 from ..writer import OutputWriter
 
@@ -216,9 +216,7 @@ class BaseCommand(Command):
 )
 @click.option("--pip-args", help="Arguments to pass directly to the pip command.")
 @click.option(
-    "--new-resolver/--no-new-resolver",
-    is_flag=True,
-    default=True,
+    "--new-resolver/--no-new-resolver", is_flag=True, default=True,
 )
 @click.option(
     "--emit-index-url/--no-emit-index-url",
@@ -372,7 +370,7 @@ def cli(
             existing_pins, repository, reuse_hashes=reuse_hashes
         )
 
-        print('existing pins:', existing_pins)
+        print("existing pins:", existing_pins)
 
     ###
     # Parsing/collecting initial requirements
@@ -449,7 +447,7 @@ def cli(
     resolver_cls = NewResolver if new_resolver else Resolver
 
     if existing_pins:
-        print('constraints before:', constraints)
+        print("constraints before:", constraints)
         existing_constraints = list(existing_pins.values())
         for c in constraints:
             c.user_supplied = True
@@ -459,8 +457,7 @@ def cli(
             c.user_supplied = False
 
         constraints.extend(existing_constraints)
-        print('constraints after:', constraints)
-
+        print("constraints after:", constraints)
 
     try:
         resolver = resolver_cls(

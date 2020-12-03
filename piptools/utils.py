@@ -79,11 +79,11 @@ def format_requirement(ireq, marker=None, hashes=None):
     """
     if ireq.editable:
         line = "-e {}".format(ireq.link.url)
-    # FIXME ireq.original_link is always populated now
-    # elif is_url_requirement(ireq):
-    #    line = ireq.link.url
+    # FIXME ireq.original_link is always populated now (maybe?)
+    elif is_url_requirement(ireq):
+        line = ireq.link.url
     else:
-        line = str(ireq.req).lower()
+        line = str(ireq.req).replace("_", "-").lower()  # FIXME dirty hack
 
     if marker:
         line = "{} ; {}".format(line, marker)

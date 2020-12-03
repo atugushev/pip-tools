@@ -1,5 +1,4 @@
 from pip._internal.cache import WheelCache
-from pip._internal.req import RequirementSet
 from pip._internal.req.req_tracker import get_requirement_tracker
 from pip._internal.utils.logging import indent_log
 from pip._internal.utils.temp_dir import TempDirectory, global_tempdir_manager
@@ -9,12 +8,7 @@ from piptools.logging import log
 
 
 class NewResolver(object):
-    def __init__(
-        self,
-        constraints,
-        repository,
-        **kwargs
-    ):
+    def __init__(self, constraints, repository, **kwargs):
         self.constraints = constraints
         self.repository = repository
         self.unsafe_constraints = set()
@@ -24,13 +18,14 @@ class NewResolver(object):
         self.finder = self.repository.finder
         self.command = self.repository.command
 
-
     def resolve(self, max_rounds=None):
         with get_requirement_tracker() as req_tracker, global_tempdir_manager(), indent_log():
 
-            wheel_cache = WheelCache(self.options.cache_dir, self.options.format_control)
+            wheel_cache = WheelCache(
+                self.options.cache_dir, self.options.format_control
+            )
 
-            build_delete = (not (self.options.no_clean or self.options.build_dir))
+            build_delete = not (self.options.no_clean or self.options.build_dir)
             temp_dir = TempDirectory(
                 self.options.build_dir,
                 delete=build_delete,
@@ -66,7 +61,7 @@ class NewResolver(object):
 
             self.command.trace_basic_info(self.finder)
 
-            resolved_reqs = resolver.resolve(
+            resolver.resolve(
                 self.constraints, check_supported_wheels=not self.options.target_dir
             )
 
@@ -75,7 +70,8 @@ class NewResolver(object):
             ireq = candidate.get_install_requirement()
             if ireq is None:
                 continue
-            ireq.req.specifier = SpecifierSet('=={}'.format(candidate.version))
+            # FIXME a dirty hack
+            ireq.req.specifier = SpecifierSet("=={}".format(candidate.version))
             reqs.add(ireq)
 
         # TODO maybe use resolver._result.graph for dependency cache?
