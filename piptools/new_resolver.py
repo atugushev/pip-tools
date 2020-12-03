@@ -7,6 +7,7 @@ from pip._vendor.packaging.specifiers import SpecifierSet
 from piptools.logging import log
 
 
+# FIXME: needs appropriate module and name
 class NewResolver(object):
     def __init__(self, constraints, repository, **kwargs):
         self.constraints = constraints
@@ -65,16 +66,15 @@ class NewResolver(object):
                 self.constraints, check_supported_wheels=not self.options.target_dir
             )
 
+        # FIXME: a dirty hack, there must be a better way to get resolved versions
         reqs = set()
         for candidate in resolver._result.mapping.values():
             ireq = candidate.get_install_requirement()
             if ireq is None:
                 continue
-            # FIXME a dirty hack
             ireq.req.specifier = SpecifierSet("=={}".format(candidate.version))
             reqs.add(ireq)
 
-        # TODO maybe use resolver._result.graph for dependency cache?
         return reqs
 
     def resolve_hashes(self, ireqs):

@@ -374,9 +374,7 @@ def test_editable_package_constraint_without_non_editable_duplicate(pip_conf, ru
     fake_package_dir = os.path.join(PACKAGES_PATH, "small_fake_a")
     fake_package_dir = path_to_url(fake_package_dir)
     with open("constraints.txt", "w") as constraints:
-        constraints.write(
-            "-e " + fake_package_dir + "#egg=small_fake_a"
-        )  # require editable fake package
+        constraints.write("-e " + fake_package_dir)  # require editable fake package
 
     with open("requirements.in", "w") as req_in:
         req_in.write(
@@ -774,7 +772,10 @@ def test_generate_hashes_with_annotations(runner):
 
 
 @pytest.mark.network
-@pytest.mark.xfail(reason="Must be fixed (dont preserver nested annotations)")
+@pytest.mark.xfail(
+    # FIXME: maybe use resolver._result.graph for reverse dependency and annotation?
+    reason="Must be fixed (doesn't preserve nested annotations)"
+)
 def test_generate_hashes_with_long_annotations(runner):
     with open("requirements.in", "w") as fp:
         fp.write("django-debug-toolbar==1.11\n")
@@ -1000,7 +1001,7 @@ def test_multiple_input_files_without_output_file(runner):
         ),
     ),
 )
-@pytest.mark.xfail(reason="Need to fix")
+@pytest.mark.xfail(reason="Must be fixed")
 def test_annotate_option(pip_conf, runner, option, expected):
     """
     The output lines has have annotations if option is turned on.
@@ -1289,7 +1290,7 @@ def test_options_in_requirements_file(runner, options):
         ),
     ),
 )
-@pytest.mark.skip(reason="new resolver handlers NoCandidateFound now")
+@pytest.mark.skip(reason="pip's resolver handles now NoCandidateFound-like errors")
 def test_unreachable_index_urls(runner, cli_options, expected_message):
     """
     Test pip-compile raises an error if index URLs are not reachable.
