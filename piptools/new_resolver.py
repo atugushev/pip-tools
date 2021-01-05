@@ -7,8 +7,8 @@ from pip._vendor.packaging.specifiers import SpecifierSet
 from piptools.logging import log
 
 
-# FIXME: needs appropriate module and name
 class NewResolver(object):
+    # FIXME: needs appropriate module and name
     def __init__(self, constraints, repository, **kwargs):
         self.constraints = constraints
         self.repository = repository
@@ -68,11 +68,19 @@ class NewResolver(object):
 
         # FIXME: a dirty hack, there must be a better way to get resolved versions
         reqs = set()
-        for candidate in resolver._result.mapping.values():
+        for name, candidate in resolver._result.mapping.items():
             ireq = candidate.get_install_requirement()
             if ireq is None:
                 continue
             ireq.req.specifier = SpecifierSet("=={}".format(candidate.version))
+
+            # FIXME: use graph in output writer?
+            ireq._required_by = tuple(
+                parent_name
+                for parent_name in resolver._result.graph.iter_parents(name)
+                if parent_name is not None
+            )
+
             reqs.add(ireq)
 
         return reqs

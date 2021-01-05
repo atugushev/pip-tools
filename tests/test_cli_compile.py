@@ -1207,7 +1207,6 @@ def test_empty_input_file_no_header(runner, empty_input_pkg, prior_output_pkg):
         assert req_txt.read().strip() == ""
 
 
-@pytest.mark.xfail(reason="Must be fixed")
 def test_upgrade_package_doesnt_remove_annotation(pip_conf, runner):
     """
     Tests pip-compile --upgrade-package shouldn't remove "via" annotation.
