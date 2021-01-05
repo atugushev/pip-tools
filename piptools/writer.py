@@ -227,11 +227,14 @@ class OutputWriter(object):
                 for src_ireq in ireq._source_ireqs
                 if src_ireq.comes_from
             }
-        elif ireq.comes_from:
+
+        if ireq.comes_from:
             required_by.add(_comes_from_as_string(ireq))
-        elif hasattr(ireq, "_required_by"):
+
+        if hasattr(ireq, "_required_by"):
             for name in ireq._required_by:
                 required_by.add(name)
+
         if required_by:
             required_by = sorted(required_by)
             if len(required_by) == 1:

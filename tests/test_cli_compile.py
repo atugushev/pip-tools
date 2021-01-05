@@ -772,10 +772,6 @@ def test_generate_hashes_with_annotations(runner):
 
 
 @pytest.mark.network
-@pytest.mark.xfail(
-    # FIXME: maybe use resolver._result.graph for reverse dependency and annotation?
-    reason="Must be fixed (doesn't preserve nested annotations)"
-)
 def test_generate_hashes_with_long_annotations(runner):
     with open("requirements.in", "w") as fp:
         fp.write("django-debug-toolbar==1.11\n")
